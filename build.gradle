@@ -1,0 +1,45 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.8.21'
+    id 'application'
+    id 'maven-publish'
+}
+
+group = 'io.github.deficuet'
+version = '0.0.1'
+
+repositories {
+    maven { url "https://www.brockmann-consult.de/mvn/os/" }
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven {
+        url "http://maven.geo-solutions.it/"
+        allowInsecureProtocol = true
+    }
+}
+
+dependencies {
+    implementation 'com.github.Deficuet:UnityKt:v0.0.1-beta.2.3'
+    implementation 'org.json:json:20230227'
+    implementation 'com.github.Deficuet:JImageUtils:v0.0.2'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = 11
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = 11
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
