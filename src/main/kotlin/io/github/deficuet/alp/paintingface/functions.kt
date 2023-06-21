@@ -34,13 +34,14 @@ fun analyzePaintingface(filePath: Path): AnalyzeStatus {
                 ),
                 faceRect.apply { pastePoint -= Vector2(left, bottom) }
             )
-        ), manager
+        ), manager, stack.size > 1
     )
 }
 
 class PaintingfaceAnalyzeStatus internal constructor(
     val result: AnalyzeResult<TextureTransform>,
-    val manager: UnityAssetManager
+    val manager: UnityAssetManager,
+    val requiresMerge: Boolean
 ): AnalyzeStatus(true, "")
 
 fun scalePaintingface(image: BufferedImage, tr: TextureTransform): BufferedImage {
