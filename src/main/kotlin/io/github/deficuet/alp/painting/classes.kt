@@ -3,6 +3,7 @@ package io.github.deficuet.alp.painting
 import io.github.deficuet.alp.*
 import io.github.deficuet.unitykt.*
 import io.github.deficuet.unitykt.data.MonoBehaviour
+import io.github.deficuet.unitykt.data.Sprite
 import io.github.deficuet.unitykt.math.Vector2
 import org.json.JSONObject
 
@@ -41,23 +42,23 @@ class PaintingTransform private constructor(
                 ?.typeTreeJson
         }
 
-        internal fun createFrom(rect: ExtendedTransform): PaintingTransform? {
-            return getMonoBehaviour(rect)?.let { mono ->
+        internal fun createFrom(tr: ExtendedTransform): PaintingTransform? {
+            return getMonoBehaviour(tr)?.let { mono ->
                     if ("m_Sprite" in mono.keySet()) {
                         val spritePathID = mono.getJSONObject("m_Sprite").getLong("m_PathID")
-                        rect.tr.assetFile.root.manager.objects.find {
+                        tr.tr.assetFile.root.manager.objects.find {
                             it.mPathID == spritePathID
-                        }?.let { spriteObj ->
+                        }.safeCast<Sprite>()?.let { spriteObj ->
                             PaintingTransform(
-                                spriteObj.assetFile.root.name,
+                                spriteObj.mRD.texture.getObj()!!.mName,
                                 spritePathID,
                                 mono.getJSONObject("mMesh").getLong("m_PathID"),
                                 mono.getJSONObject("mRawSpriteSize").let {
                                     Vector2(it.getDouble("x"), it.getDouble("y"))
                                 },
-                                rect.unscaledSize,
-                                rect.overallScale,
-                                rect.origin.round() // + Vector2(1.0, 1.0)
+                                tr.unscaledSize,
+                                tr.overallScale,
+                                tr.origin.round() // + Vector2(1.0, 1.0)
                             )
                         }
                     } else null

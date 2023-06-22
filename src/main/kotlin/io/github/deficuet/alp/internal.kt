@@ -22,6 +22,10 @@ internal class PreCheckStatus(
 
 internal fun Vector2.round() = Vector2(round(x), round(y))
 
+internal inline fun <reified T> Any?.safeCast(): T? {
+    return if (this is T) this else null
+}
+
 internal fun checkFile(filePath: Path): AnalyzeStatus {
     if (!Files.isRegularFile(filePath)) {
         return AnalyzeStatus(false, "该路径不是文件")

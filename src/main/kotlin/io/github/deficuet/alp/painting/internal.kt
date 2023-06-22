@@ -2,8 +2,6 @@ package io.github.deficuet.alp.painting
 
 import io.github.deficuet.alp.*
 import io.github.deficuet.unitykt.data.*
-import java.awt.image.*
-import kotlin.math.roundToInt
 
 internal fun buildPaintingStack(root: GameObject): List<PaintingTransform> {
     return buildTransformTree(
