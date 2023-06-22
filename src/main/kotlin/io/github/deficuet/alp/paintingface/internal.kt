@@ -1,7 +1,10 @@
 package io.github.deficuet.alp.paintingface
 
-import io.github.deficuet.alp.*
+import io.github.deficuet.alp.ExtendedTransform
+import io.github.deficuet.alp.TextureTransform
+import io.github.deficuet.alp.buildTransformTree
 import io.github.deficuet.alp.painting.PaintingTransform
+import io.github.deficuet.alp.round
 import io.github.deficuet.unitykt.data.GameObject
 import io.github.deficuet.unitykt.getObj
 import io.github.deficuet.unitykt.math.Vector2

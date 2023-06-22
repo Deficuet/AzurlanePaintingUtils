@@ -1,7 +1,10 @@
 package io.github.deficuet.alp.painting
 
-import io.github.deficuet.alp.*
-import io.github.deficuet.unitykt.data.*
+import io.github.deficuet.alp.AnalyzeResult
+import io.github.deficuet.alp.ExtendedTransform
+import io.github.deficuet.alp.buildTransformTree
+import io.github.deficuet.alp.measureBoundary
+import io.github.deficuet.unitykt.data.GameObject
 
 internal fun buildPaintingStack(root: GameObject): List<PaintingTransform> {
     return buildTransformTree(

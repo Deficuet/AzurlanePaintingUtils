@@ -1,9 +1,11 @@
 package io.github.deficuet.alp.painting
 
 import io.github.deficuet.alp.*
-import io.github.deficuet.unitykt.*
+import io.github.deficuet.unitykt.UnityAssetManager
 import io.github.deficuet.unitykt.data.MonoBehaviour
 import io.github.deficuet.unitykt.data.Sprite
+import io.github.deficuet.unitykt.firstOfOrNull
+import io.github.deficuet.unitykt.getObj
 import io.github.deficuet.unitykt.math.Vector2
 import org.json.JSONObject
 

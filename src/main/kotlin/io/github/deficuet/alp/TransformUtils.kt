@@ -1,7 +1,8 @@
 package io.github.deficuet.alp
 
-import io.github.deficuet.unitykt.data.*
-import io.github.deficuet.unitykt.math.*
+import io.github.deficuet.unitykt.data.RectTransform
+import io.github.deficuet.unitykt.data.Transform
+import io.github.deficuet.unitykt.math.Vector2
 
 open class ExtendedTransform internal constructor(
     val tr: Transform
