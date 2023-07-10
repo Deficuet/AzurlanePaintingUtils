@@ -51,7 +51,10 @@ fun analyzePainting(filePath: Path): AnalyzeStatus {
     }
     val stack = buildPaintingStack(baseGameObject)
     if (stack.size == 1) {
-        return AnalyzeStatusStacks(false, "无需合并", dependencies, stack)
+        return AnalyzeStatusStacks(
+            false, "无需合并",
+            dependencies, stack[0], manager
+        )
     }
     return PaintingAnalyzeStatus(
         dependencies,

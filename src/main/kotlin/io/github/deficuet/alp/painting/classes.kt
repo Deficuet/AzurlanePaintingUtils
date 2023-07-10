@@ -19,7 +19,8 @@ class AnalyzeStatusStacks internal constructor(
     succeed: Boolean,
     message: String,
     dependencies: Map<String, Boolean>,
-    val transforms: List<PaintingTransform>,
+    val transform: PaintingTransform,
+    val manager: UnityAssetManager
 ): AnalyzeStatusDep(succeed, message, dependencies)
 
 class PaintingAnalyzeStatus internal constructor(
