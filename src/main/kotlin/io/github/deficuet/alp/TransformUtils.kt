@@ -48,8 +48,8 @@ internal class ExtendedTransformChild(
             if (parent.tr is RectTransform) {
                 with(tr) {
                     (mAnchorMax - mAnchorMin) * parent.size * mPivot +
-                            mAnchorMin * parent.size + parent.origin +
-                            mAnchoredPosition * cumulativeScale
+                        mAnchorMin * parent.size + parent.origin +
+                        mAnchoredPosition * cumulativeScale
                 }
             } else {
                 parent.pivotPosition + tr.mAnchoredPosition * cumulativeScale
@@ -69,7 +69,7 @@ internal class ExtendedTransformChild(
     override val unscaledSize: Vector2
         get() = if (tr is RectTransform) {
             with(tr) {
-                (mAnchorMax - mAnchorMin) * parent.unscaledSize + mSizeDelta
+                (mAnchorMax - mAnchorMin) * parent.size + mSizeDelta
             }
         } else {
             Vector2.Zero

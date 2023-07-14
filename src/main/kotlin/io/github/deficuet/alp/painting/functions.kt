@@ -75,14 +75,10 @@ fun rebuildPainting(manager: UnityAssetManager, tr: PaintingTransform): Buffered
 }
 
 fun decoratePainting(image: BufferedImage, tr: PaintingTransform): BufferedImage {
-    val w = tr.rawPaintingSize.x.toInt()
-    val h = tr.rawPaintingSize.y.toInt()
+    val w = maxOf(tr.rawPaintingSize.x.toInt(), image.width)
+    val h = maxOf(tr.rawPaintingSize.y.toInt(), image.height)
     return if (w > image.width || h > image.height) {
-        BufferedImage(
-            maxOf(w, image.width),
-            maxOf(h, image.height),
-            image.type
-        ).paste(image, 0, 0)
+        BufferedImage(w, h, image.type).paste(image, 0, 0)
     } else {
         image
     }.fancyResize(
