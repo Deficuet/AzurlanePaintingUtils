@@ -13,7 +13,7 @@ internal fun buildPaintingfaceStack(root: GameObject): MutableList<TextureTransf
     return buildTransformTree(ExtendedTransform(root.mTransform[0])) {
         val mono = PaintingTransform.getMonoBehaviour(it)
         if (
-            it.tr.mGameObject.getObj()!!.mName == "face"
+            it.tr.mGameObject.getObj().mName == "face"
         ) {
             PaintingfaceTransform(
                 it.unscaledSize,

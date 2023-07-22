@@ -7,6 +7,7 @@ import io.github.deficuet.unitykt.data.Sprite
 import io.github.deficuet.unitykt.firstOfOrNull
 import io.github.deficuet.unitykt.getObj
 import io.github.deficuet.unitykt.math.Vector2
+import io.github.deficuet.unitykt.safeFindWithPathID
 import org.json.JSONObject
 
 open class AnalyzeStatusDep internal constructor(
@@ -40,30 +41,29 @@ class PaintingTransform private constructor(
 ): TextureTransform(unscaledSize, overallScale, pastePoint) {
     internal companion object {
         internal fun getMonoBehaviour(tr: ExtendedTransform): JSONObject? {
-            return tr.tr.mGameObject.getObj()!!.mComponents
-                .mapNotNull { it.getObj() }.firstOfOrNull<MonoBehaviour>()
-                ?.typeTreeJson
+            return tr.tr.mGameObject.getObj().mComponents
+                .firstOfOrNull<MonoBehaviour>()?.typeTreeJson
         }
 
         internal fun createFrom(tr: ExtendedTransform): PaintingTransform? {
             return getMonoBehaviour(tr)?.let { mono ->
                     if ("m_Sprite" in mono.keySet()) {
                         val spritePathID = mono.getJSONObject("m_Sprite").getLong("m_PathID")
-                        tr.tr.assetFile.root.manager.objects.find {
-                            it.mPathID == spritePathID
-                        }.safeCast<Sprite>()?.let { spriteObj ->
-                            PaintingTransform(
-                                spriteObj.mRD.texture.getObj()!!.mName,
-                                spritePathID,
-                                mono.getJSONObject("mMesh").getLong("m_PathID"),
-                                mono.getJSONObject("mRawSpriteSize").let {
-                                    Vector2(it.getDouble("x"), it.getDouble("y"))
-                                },
-                                tr.unscaledSize,
-                                tr.overallScale,
-                                tr.origin.round() // + Vector2(1.0, 1.0)
-                            )
-                        }
+                        tr.tr.assetFile.root.manager.objectList
+                            .safeFindWithPathID<Sprite>(spritePathID)
+                            ?.let { spriteObj ->
+                                PaintingTransform(
+                                    spriteObj.mRD.texture.getObj().mName,
+                                    spritePathID,
+                                    mono.getJSONObject("mMesh").getLong("m_PathID"),
+                                    mono.getJSONObject("mRawSpriteSize").let {
+                                        Vector2(it.getDouble("x"), it.getDouble("y"))
+                                    },
+                                    tr.unscaledSize,
+                                    tr.overallScale,
+                                    tr.origin.round() // + Vector2(1.0, 1.0)
+                                )
+                            }
                     } else null
                 }
         }

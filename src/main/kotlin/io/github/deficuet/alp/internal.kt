@@ -7,6 +7,7 @@ import io.github.deficuet.unitykt.firstOfOrNull
 import io.github.deficuet.unitykt.getObj
 import io.github.deficuet.unitykt.math.Vector2
 import io.github.deficuet.unitykt.math.Vector4
+import io.github.deficuet.unitykt.safeGetObj
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
@@ -26,10 +27,6 @@ internal class PreCheckStatus(
 
 internal fun Vector2.round() = Vector2(round(x), round(y))
 
-internal inline fun <reified T> Any?.safeCast(): T? {
-    return if (this is T) this else null
-}
-
 internal fun checkFile(filePath: Path): AnalyzeStatus {
     if (!Files.isRegularFile(filePath)) {
         return AnalyzeStatus(false, "该路径不是文件")
@@ -45,7 +42,7 @@ internal fun checkFile(filePath: Path): AnalyzeStatus {
     }
     val bundle = context.objectList.firstOfOrNull<AssetBundle>()
         ?: return AnalyzeStatus(false)
-    val baseGameObject = bundle.mContainer[0].second.asset.getObj()
+    val baseGameObject = bundle.mContainer[0].second.asset.safeGetObj()
     if (baseGameObject == null || baseGameObject !is GameObject || baseGameObject.mTransform.isEmpty()) {
         return AnalyzeStatus(false)
     }
@@ -62,7 +59,7 @@ internal fun <T: TextureTransform> buildTransformTree(
         result.add(attach)
     }
     for (child in parent.tr.mChildren) {
-        val rect = child.getObj()
+        val rect = child.safeGetObj()
         if (rect != null) {
             result.addAll(
                 buildTransformTree(

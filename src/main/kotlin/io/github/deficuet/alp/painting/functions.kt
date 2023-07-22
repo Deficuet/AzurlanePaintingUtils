@@ -9,8 +9,8 @@ import io.github.deficuet.unitykt.UnityAssetManager
 import io.github.deficuet.unitykt.data.Mesh
 import io.github.deficuet.unitykt.data.Sprite
 import io.github.deficuet.unitykt.data.Texture2D
+import io.github.deficuet.unitykt.findWithPathID
 import io.github.deficuet.unitykt.getObj
-import io.github.deficuet.unitykt.objectFromPathID
 import java.awt.image.*
 import java.nio.file.Path
 import kotlin.collections.indices
@@ -64,12 +64,12 @@ fun analyzePainting(filePath: Path): AnalyzeStatus {
 }
 
 fun rebuildPainting(manager: UnityAssetManager, tr: PaintingTransform): BufferedImage {
-    val rawPainting = manager.objects.objectFromPathID<Sprite>(tr.sprite).mRD.texture.getObj()!!
+    val rawPainting = manager.objectList.findWithPathID<Sprite>(tr.sprite).mRD.texture.getObj()
     return if (tr.mesh == 0L) {
         rawPainting.image
     } else {
         rawPainting.rebuildPainting(
-            manager.objects.objectFromPathID(tr.mesh)
+            manager.objectList.findWithPathID(tr.mesh)
         )
     }
 }
