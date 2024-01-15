@@ -7,18 +7,22 @@ import io.github.deficuet.unitykt.math.Vector2
 import java.awt.image.BufferedImage
 import java.nio.file.Path
 
-fun analyzePaintingface(filePath: Path): AnalyzeStatus {
-    val checkResult = checkFile(filePath)
-    if (checkResult !is PreCheckStatus) return checkResult
-    val (manager, _, baseGameObject) = checkResult
+fun analyzePaintingface(filePath: Path, assetSystemRoot: Path): AnalyzeStatus {
+    val manager = UnityAssetManager.new(assetSystemRoot)
+    val checkResult = checkFile(filePath, manager)
+    if (checkResult !is PreCheckStatus) {
+        manager.close()
+        return checkResult
+    }
+    val (_, baseGameObject) = checkResult
     val stack = buildPaintingfaceStack(baseGameObject)
     val faceRect = stack.find { it is PaintingfaceTransform }
         ?: return AnalyzeStatus(false, "没有可用的数据")
     stack.remove(faceRect)
     val paintingBox = measureBoundary(stack)
     faceRect.pastePoint -= paintingBox.vector2
-    val left = minOf(0.0, faceRect.pastePoint.x)
-    val bottom = minOf(0.0, faceRect.pastePoint.y)
+    val left = minOf(0f, faceRect.pastePoint.x)
+    val bottom = minOf(0f, faceRect.pastePoint.y)
     val (faceRight, faceTop) = with(faceRect) {
         pastePoint + (unscaledSize * overallScale)
     }
@@ -29,7 +33,7 @@ fun analyzePaintingface(filePath: Path): AnalyzeStatus {
             listOf(
                 TextureTransform(
                     Vector2(paintingBox.z, paintingBox.w),
-                    Vector2(1.0, 1.0),
+                    Vector2(1f, 1f),
                     Vector2(-left, -bottom)
                 ),
                 faceRect.apply { pastePoint -= Vector2(left, bottom) }

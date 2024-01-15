@@ -5,22 +5,24 @@ import io.github.deficuet.alp.TextureTransform
 import io.github.deficuet.alp.buildTransformTree
 import io.github.deficuet.alp.painting.PaintingTransform
 import io.github.deficuet.alp.round
-import io.github.deficuet.unitykt.data.GameObject
-import io.github.deficuet.unitykt.getObj
+import io.github.deficuet.unitykt.classes.GameObject
 import io.github.deficuet.unitykt.math.Vector2
+import io.github.deficuet.unitykt.pptr.getObj
 
 internal fun buildPaintingfaceStack(root: GameObject): MutableList<TextureTransform> {
-    return buildTransformTree(ExtendedTransform(root.mTransform[0])) {
-        val mono = PaintingTransform.getMonoBehaviour(it)
-        if (
-            it.tr.mGameObject.getObj().mName == "face"
-        ) {
+    return buildTransformTree(ExtendedTransform(root.mTransform!!)) {
+        val gameObjec = it.tr.mGameObject.getObj()
+        val mono = PaintingTransform.getMonoBehaviour(gameObjec)
+        if (gameObjec.mName == "face") {
             PaintingfaceTransform(
                 it.unscaledSize,
                 it.overallScale,
                 it.origin.round()
             )
-        } else if (mono != null && "m_Sprite" in mono.keySet()) {
+        } else if (
+            gameObjec.mIsActive && mono != null &&
+            "m_Sprite" in mono.keySet() && "mMesh" in mono.keySet()
+        ) {
             TextureTransform(
                 it.unscaledSize,
                 it.overallScale,

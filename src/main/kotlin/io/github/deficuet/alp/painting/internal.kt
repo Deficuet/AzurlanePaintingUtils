@@ -4,11 +4,11 @@ import io.github.deficuet.alp.AnalyzeResult
 import io.github.deficuet.alp.ExtendedTransform
 import io.github.deficuet.alp.buildTransformTree
 import io.github.deficuet.alp.measureBoundary
-import io.github.deficuet.unitykt.data.GameObject
+import io.github.deficuet.unitykt.classes.GameObject
 
 internal fun buildPaintingStack(root: GameObject): List<PaintingTransform> {
     return buildTransformTree(
-        ExtendedTransform(root.mTransform[0]),
+        ExtendedTransform(root.mTransform!!),
         PaintingTransform.Companion::createFrom
     )
 }

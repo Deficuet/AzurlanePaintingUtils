@@ -6,48 +6,34 @@ import io.github.deficuet.alp.checkFile
 import io.github.deficuet.jimage.fancyResize
 import io.github.deficuet.jimage.paste
 import io.github.deficuet.unitykt.UnityAssetManager
-import io.github.deficuet.unitykt.data.Mesh
-import io.github.deficuet.unitykt.data.Sprite
-import io.github.deficuet.unitykt.data.Texture2D
-import io.github.deficuet.unitykt.findWithPathID
-import io.github.deficuet.unitykt.getObj
+import io.github.deficuet.unitykt.classes.Mesh
+import io.github.deficuet.unitykt.classes.Texture2D
 import java.awt.image.*
 import java.nio.file.Path
-import kotlin.collections.indices
-import kotlin.collections.isNotEmpty
-import kotlin.collections.last
-import kotlin.collections.maxOf
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.math.roundToInt
 
-fun analyzePainting(filePath: Path): AnalyzeStatus {
-    val checkResult = checkFile(filePath)
-    if (checkResult !is PreCheckStatus) return checkResult
-    val (manager, bundle, baseGameObject) = checkResult
+fun analyzePainting(filePath: Path, assetSystemRoot: Path): AnalyzeStatus {
+    val manager = UnityAssetManager.new(assetSystemRoot)
+    val checkResult = checkFile(filePath, manager)
+    if (checkResult !is PreCheckStatus) {
+        manager.close()
+        return checkResult
+    }
+    val (bundle, baseGameObject) = checkResult
     val dependencies = mutableMapOf<String, Boolean>()
     var checkPassed = true
     if (bundle.mDependencies.isNotEmpty()) {
         for (dependency in bundle.mDependencies) {
             val fileName = dependency.split("/").last()
-            val exist = filePath.parent.resolve(fileName).exists()
+            val exist = assetSystemRoot.resolve(dependency).exists()
             dependencies[fileName] = exist
             if (!exist) checkPassed = false
         }
     }
     if (!checkPassed) {
         return AnalyzeStatusDep(dependencies = dependencies)
-    }
-    try {
-        for (dependencyName in dependencies.keys) {
-            manager.loadFile(
-                filePath.parent.resolve(dependencyName).absolutePathString()
-            )
-        }
-    } catch (e: Exception) {
-        return AnalyzeStatusDep(message = "加载依赖文件时出错", dependencies = dependencies)
     }
     val stack = buildPaintingStack(baseGameObject)
     if (stack.size == 1) {
@@ -63,14 +49,12 @@ fun analyzePainting(filePath: Path): AnalyzeStatus {
     )
 }
 
-fun rebuildPainting(manager: UnityAssetManager, tr: PaintingTransform): BufferedImage {
-    val rawPainting = manager.objectList.findWithPathID<Sprite>(tr.sprite).mRD.texture.getObj()
-    return if (tr.mesh == 0L) {
-        rawPainting.image
+fun rebuildPaintingFrom(tr: PaintingTransform): BufferedImage {
+    val rawPainting = tr.sprite.getTexture2D()!!
+    return if (tr.mesh == null) {
+        rawPainting.getImage()!!
     } else {
-        rawPainting.rebuildPainting(
-            manager.objectList.findWithPathID(tr.mesh)
-        )
+        rebuildPainting(rawPainting, tr.mesh)
     }
 }
 
@@ -87,23 +71,25 @@ fun decoratePainting(image: BufferedImage, tr: PaintingTransform): BufferedImage
     )
 }
 
-fun Texture2D.rebuildPainting(mesh: Mesh): BufferedImage {
-    val width = mesh.exportVertices.maxOf { it.x }.toInt() + 1
-    val height = mesh.exportVertices.maxOf { it.y }.toInt() + 1
-    val imgData = decompressedImageData
+fun rebuildPainting(tex: Texture2D, mesh: Mesh): BufferedImage {
+    val v = mesh.exportVertices()
+    val width = v.maxOf { it.x }.toInt() + 1
+    val height = v.maxOf { it.y }.toInt() + 1
+    val imgData = tex.getDecompressedData()!!
     val outArray = ByteArray(height * width * 4)
-    for (i in mesh.exportVertices.indices step 4) {
-        val v1 = mesh.exportUV[i]; val v2 = mesh.exportUV[i + 2]
-        val (px, py) = mesh.exportVertices[i]
-        val fixY = if (py == 0.0) 1 else 0
-        val v1x = (v1[0] * mWidth).roundToInt()
-        val v1y = (v1[1] * mHeight).roundToInt() + fixY
-        val v2x = (v2[0] * mWidth).roundToInt()
-        val v2y = (v2[1] * mHeight).roundToInt()
+    for (i in v.indices step 4) {
+        val vt = mesh.exportUV()
+        val v1 = vt[i]; val v2 = vt[i + 2]
+        val (px, py) = v[i]
+        val fixY = if (py == 0f) 1 else 0
+        val v1x = (v1[0] * tex.mWidth).roundToInt()
+        val v1y = (v1[1] * tex.mHeight).roundToInt() + fixY
+        val v2x = (v2[0] * tex.mWidth).roundToInt()
+        val v2y = (v2[1] * tex.mHeight).roundToInt()
         if (v2x - v1x != 0 && v2y - v1y != 0) {
             imgData.copyBGRABlockTo(
                 outArray, py.toInt(), px.toInt(), width,
-                v1y, v2y, v1x, v2x, mWidth
+                v1y, v2y, v1x, v2x, tex.mWidth
             )
         }
     }

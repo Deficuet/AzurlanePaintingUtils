@@ -1,29 +1,29 @@
 package io.github.deficuet.alp
 
-import io.github.deficuet.unitykt.data.RectTransform
-import io.github.deficuet.unitykt.data.Transform
+import io.github.deficuet.unitykt.classes.RectTransform
+import io.github.deficuet.unitykt.classes.Transform
 import io.github.deficuet.unitykt.math.Vector2
 
 open class ExtendedTransform internal constructor(
     val tr: Transform
 ) {
     open val localScale
-        get() = Vector2(1.0, 1.0)
+        get() = Vector2(1f, 1f)
 
     open val cumulativeScale
-        get() = Vector2(1.0, 1.0)
+        get() = Vector2(1f, 1f)
 
     val overallScale
         get() = localScale * cumulativeScale
 
     open val pivotPosition: Vector2
-        get() = if (tr is RectTransform) size * tr.mPivot else Vector2(0.0, 0.0)
+        get() = if (tr is RectTransform) size * tr.mPivot else Vector2(0f, 0f)
 
     open val origin
         get() = Vector2.Zero
 
     open val unscaledSize: Vector2
-        get() = if (tr is RectTransform) tr.mSizeDelta else Vector2(0.0, 0.0)
+        get() = if (tr is RectTransform) tr.mSizeDelta else Vector2(0f, 0f)
 
     open val size
         get() = unscaledSize

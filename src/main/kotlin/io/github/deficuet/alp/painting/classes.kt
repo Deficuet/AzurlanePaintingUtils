@@ -2,12 +2,14 @@ package io.github.deficuet.alp.painting
 
 import io.github.deficuet.alp.*
 import io.github.deficuet.unitykt.UnityAssetManager
-import io.github.deficuet.unitykt.data.MonoBehaviour
-import io.github.deficuet.unitykt.data.Sprite
-import io.github.deficuet.unitykt.firstOfOrNull
-import io.github.deficuet.unitykt.getObj
+import io.github.deficuet.unitykt.classes.GameObject
+import io.github.deficuet.unitykt.classes.Mesh
+import io.github.deficuet.unitykt.classes.MonoBehaviour
+import io.github.deficuet.unitykt.classes.Sprite
 import io.github.deficuet.unitykt.math.Vector2
-import io.github.deficuet.unitykt.safeFindWithPathID
+import io.github.deficuet.unitykt.pptr.firstOfOrNull
+import io.github.deficuet.unitykt.pptr.getObj
+import io.github.deficuet.unitykt.pptr.safeGetObj
 import org.json.JSONObject
 
 open class AnalyzeStatusDep internal constructor(
@@ -32,40 +34,45 @@ class PaintingAnalyzeStatus internal constructor(
 
 class PaintingTransform private constructor(
     val fileName: String,
-    val sprite: Long,
-    val mesh: Long,
+    val sprite: Sprite,
+    val mesh: Mesh?,
     val rawPaintingSize: Vector2,
     unscaledSize: Vector2,
     overallScale: Vector2,
     pastePoint: Vector2
 ): TextureTransform(unscaledSize, overallScale, pastePoint) {
     internal companion object {
-        internal fun getMonoBehaviour(tr: ExtendedTransform): JSONObject? {
-            return tr.tr.mGameObject.getObj().mComponents
-                .firstOfOrNull<MonoBehaviour>()?.typeTreeJson
+        internal fun getMonoBehaviour(gameObject: GameObject): JSONObject? {
+            return gameObject.mComponents.firstOfOrNull<MonoBehaviour>()?.toTypeTreeJson()
         }
 
         internal fun createFrom(tr: ExtendedTransform): PaintingTransform? {
-            return getMonoBehaviour(tr)?.let { mono ->
-                    if ("m_Sprite" in mono.keySet()) {
-                        val spritePathID = mono.getJSONObject("m_Sprite").getLong("m_PathID")
-                        tr.tr.assetFile.root.manager.objectList
-                            .safeFindWithPathID<Sprite>(spritePathID)
-                            ?.let { spriteObj ->
-                                PaintingTransform(
-                                    spriteObj.mRD.texture.getObj().mName,
-                                    spritePathID,
-                                    mono.getJSONObject("mMesh").getLong("m_PathID"),
-                                    mono.getJSONObject("mRawSpriteSize").let {
-                                        Vector2(it.getDouble("x"), it.getDouble("y"))
-                                    },
-                                    tr.unscaledSize,
-                                    tr.overallScale,
-                                    tr.origin.round() // + Vector2(1.0, 1.0)
-                                )
-                            }
-                    } else null
-                }
+            val gameObject = tr.tr.mGameObject.getObj()
+            if (!gameObject.mIsActive) return null
+            return getMonoBehaviour(gameObject)?.let { mono ->
+                if ("m_Sprite" in mono.keySet() && "mMesh" in mono.keySet()) {
+                    with(mono.getJSONObject("m_Sprite")) {
+                        tr.tr.createPPtr<Sprite>(
+                            getInt("m_FileID"),
+                            getLong("m_PathID")
+                        ).safeGetObj()
+                    }?.let { spriteObj ->
+                        PaintingTransform(
+                            spriteObj.mName, spriteObj,
+                            with(mono.getJSONObject("mMesh")) {
+                                tr.tr.createPPtr<Mesh>(
+                                    getInt("m_FileID"),
+                                    getLong("m_PathID")
+                                ).safeGetObj()
+                            },
+                            mono.getJSONObject("mRawSpriteSize").let {
+                                Vector2(it.getFloat("x"), it.getFloat("y"))
+                            },
+                            tr.unscaledSize, tr.overallScale, tr.origin.round()
+                        )
+                    }
+                } else null
+            }
         }
     }
 }
