@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'io.github.deficuet'
-version = '0.1.0'
+version = '0.1.1'
 
 repositories {
     mavenCentral()
@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.Deficuet:UnityKt:0.1.0_alpha.10'
+    implementation 'com.github.Deficuet:UnityKt:0.1.0_alpha.11'
     implementation 'org.json:json:20231013'
     implementation 'com.github.Deficuet:JImageUtils:0.0.4.1'
     testImplementation 'org.jetbrains.kotlin:kotlin-test'

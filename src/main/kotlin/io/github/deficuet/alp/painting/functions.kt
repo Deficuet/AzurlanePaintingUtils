@@ -14,8 +14,8 @@ import kotlin.collections.set
 import kotlin.io.path.exists
 import kotlin.math.roundToInt
 
-fun analyzePainting(filePath: Path, assetSystemRoot: Path): AnalyzeStatus {
-    val manager = UnityAssetManager.new(assetSystemRoot)
+fun analyzePainting(filePath: Path, assetSystemRoot: Path, debugOutput: (String) -> Unit = {  }): AnalyzeStatus {
+    val manager = UnityAssetManager.new(assetSystemRoot, debugOutput = debugOutput)
     val checkResult = checkFile(filePath, manager)
     if (checkResult !is PreCheckStatus) {
         manager.close()

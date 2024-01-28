@@ -7,8 +7,8 @@ import io.github.deficuet.unitykt.math.Vector2
 import java.awt.image.BufferedImage
 import java.nio.file.Path
 
-fun analyzePaintingface(filePath: Path, assetSystemRoot: Path): AnalyzeStatus {
-    val manager = UnityAssetManager.new(assetSystemRoot)
+fun analyzePaintingface(filePath: Path, assetSystemRoot: Path, debugOutput: (String) -> Unit = {  }): AnalyzeStatus {
+    val manager = UnityAssetManager.new(assetSystemRoot, debugOutput = debugOutput)
     val checkResult = checkFile(filePath, manager)
     if (checkResult !is PreCheckStatus) {
         manager.close()
