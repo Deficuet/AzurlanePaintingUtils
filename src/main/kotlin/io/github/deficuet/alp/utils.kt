@@ -1,5 +1,6 @@
 package io.github.deficuet.alp
 
+import io.github.deficuet.alp.painting.PaintingTemplateTransform
 import io.github.deficuet.unitykt.math.Vector2
 
 open class AnalyzeStatus internal constructor(
@@ -16,8 +17,8 @@ open class TextureTransform internal constructor(
         internal set
 }
 
-class AnalyzeResult<T: TextureTransform> internal constructor(
+abstract class AnalyzeResult<T: PaintingTemplateTransform> internal constructor(
     val width: Int,
     val height: Int,
-    val transforms: List<T>
+    val paintingStack: List<T>
 )

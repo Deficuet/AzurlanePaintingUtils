@@ -12,6 +12,10 @@ import io.github.deficuet.unitykt.pptr.getObj
 import io.github.deficuet.unitykt.pptr.safeGetObj
 import org.json.JSONObject
 
+class PaintingAnalyzeResult internal constructor(
+    width: Int, height: Int, paintingStack: List<PaintingTransform>
+): AnalyzeResult<PaintingTransform>(width, height, paintingStack)
+
 open class AnalyzeStatusDep internal constructor(
     succeed: Boolean = false,
     message: String = "依赖项缺失",
@@ -28,22 +32,44 @@ class AnalyzeStatusStacks internal constructor(
 
 class PaintingAnalyzeStatus internal constructor(
     dependencies: Map<String, Boolean>,
-    val result: AnalyzeResult<PaintingTransform>,
+    val result: PaintingAnalyzeResult,
     val manager: UnityAssetManager
 ): AnalyzeStatusDep(true, "", dependencies)
+
+open class PaintingTemplateTransform internal constructor(
+    val rawPaintingSize: Vector2,
+    unscaledSize: Vector2,
+    overallScale: Vector2,
+    pastePoint: Vector2
+): TextureTransform(unscaledSize, overallScale, pastePoint)
 
 class PaintingTransform private constructor(
     val fileName: String,
     val sprite: Sprite,
     val mesh: Mesh?,
-    val rawPaintingSize: Vector2,
+    rawPaintingSize: Vector2,
     unscaledSize: Vector2,
     overallScale: Vector2,
     pastePoint: Vector2
-): TextureTransform(unscaledSize, overallScale, pastePoint) {
+): PaintingTemplateTransform(rawPaintingSize, unscaledSize, overallScale, pastePoint) {
     internal companion object {
-        internal fun getMonoBehaviour(gameObject: GameObject): JSONObject? {
+        private fun getMonoBehaviour(gameObject: GameObject): JSONObject? {
             return gameObject.mComponents.firstOfOrNull<MonoBehaviour>()?.toTypeTreeJson()
+        }
+
+        internal fun createTemplateFrom(tr: ExtendedTransform): PaintingTemplateTransform? {
+            val gameObject = tr.tr.mGameObject.getObj()
+            if (!gameObject.mIsActive) return null
+            return getMonoBehaviour(gameObject)?.let { mono ->
+                if ("m_Sprite" in mono.keySet() && "mMesh" in mono.keySet()) {
+                    PaintingTemplateTransform(
+                        mono.getJSONObject("mRawSpriteSize").let {
+                            Vector2(it.getFloat("x"), it.getFloat("y"))
+                        },
+                        tr.unscaledSize, tr.overallScale, tr.origin.round()
+                    )
+                } else null
+            }
         }
 
         internal fun createFrom(tr: ExtendedTransform): PaintingTransform? {
@@ -76,3 +102,4 @@ class PaintingTransform private constructor(
         }
     }
 }
+

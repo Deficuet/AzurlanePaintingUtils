@@ -1,23 +1,24 @@
 package io.github.deficuet.alp.painting
 
-import io.github.deficuet.alp.AnalyzeResult
 import io.github.deficuet.alp.ExtendedTransform
 import io.github.deficuet.alp.buildTransformTree
 import io.github.deficuet.alp.measureBoundary
 import io.github.deficuet.unitykt.classes.GameObject
 
 internal fun buildPaintingStack(root: GameObject): List<PaintingTransform> {
-    return buildTransformTree(
-        ExtendedTransform(root.mTransform!!),
-        PaintingTransform.Companion::createFrom
-    )
+    val stack = mutableListOf<PaintingTransform>()
+    buildTransformTree(ExtendedTransform(root.mTransform!!)) {
+        PaintingTransform.createFrom(it)?.let { attach -> stack.add(attach) }
+    }
+    return stack
 }
 
-internal fun pasteCorrection(transforms: List<PaintingTransform>): AnalyzeResult<PaintingTransform> {
+internal fun pasteCorrection(transforms: List<PaintingTransform>): PaintingAnalyzeResult {
     return with(measureBoundary(transforms)) {
-        AnalyzeResult(
+        val c = vector2
+        PaintingAnalyzeResult(
             z.toInt(), w.toInt(),
-            transforms.onEach { it.pastePoint -= vector2 }
+            transforms.onEach { it.pastePoint -= c }
         )
     }
 }

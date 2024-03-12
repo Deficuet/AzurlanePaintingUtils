@@ -1,6 +1,7 @@
 package io.github.deficuet.alp.paintingface
 
 import io.github.deficuet.alp.*
+import io.github.deficuet.alp.painting.PaintingTemplateTransform
 import io.github.deficuet.jimage.fancyResize
 import io.github.deficuet.unitykt.UnityAssetManager
 import io.github.deficuet.unitykt.math.Vector2
@@ -15,35 +16,37 @@ fun analyzePaintingface(filePath: Path, assetSystemRoot: Path, debugOutput: (Str
         return checkResult
     }
     val (_, baseGameObject) = checkResult
-    val stack = buildPaintingfaceStack(baseGameObject)
-    val faceRect = stack.find { it is PaintingfaceTransform }
-        ?: return AnalyzeStatus(false, "没有可用的数据")
-    stack.remove(faceRect)
-    val paintingBox = measureBoundary(stack)
-    faceRect.pastePoint -= paintingBox.vector2
-    val left = minOf(0f, faceRect.pastePoint.x)
-    val bottom = minOf(0f, faceRect.pastePoint.y)
-    val (faceRight, faceTop) = with(faceRect) {
+    val info = buildPaintingfaceStack(baseGameObject)
+    if (info.faceRect == null) return AnalyzeStatus(false, "没有可用的数据")
+    val paintingBox = measureBoundary(info.paintingStack)
+    info.faceRect.pastePoint -= paintingBox.vector2
+    val left = minOf(0f, info.faceRect.pastePoint.x)
+    val bottom = minOf(0f, info.faceRect.pastePoint.y)
+    val (faceRight, faceTop) = with(info.faceRect) {
         pastePoint + (unscaledSize * overallScale)
     }
     return PaintingfaceAnalyzeStatus(
-        AnalyzeResult(
+        PaintingfaceAnalysisResult(
             (maxOf(paintingBox.z, faceRight) - left).toInt(),
             (maxOf(paintingBox.w, faceTop) - bottom).toInt(),
-            listOf(
-                TextureTransform(
-                    Vector2(paintingBox.z, paintingBox.w),
-                    Vector2(1f, 1f),
-                    Vector2(-left, -bottom)
-                ),
-                faceRect.apply { pastePoint -= Vector2(left, bottom) }
-            )
-        ), manager, stack.size > 1
+            info.paintingStack,
+            TextureTransform(
+                Vector2(paintingBox.z, paintingBox.w),
+                Vector2(1f, 1f),
+                Vector2(-left, -bottom)
+            ),
+            info.faceRect.apply { pastePoint -= Vector2(left, bottom) }
+        ), manager, info.paintingStack.size > 1
     )
 }
 
+class PaintingfaceAnalysisResult internal constructor(
+    width: Int, height: Int, paintingStack: List<PaintingTemplateTransform>,
+    val mergedRect: TextureTransform, val faceRect: TextureTransform
+): AnalyzeResult<PaintingTemplateTransform>(width, height, paintingStack)
+
 class PaintingfaceAnalyzeStatus internal constructor(
-    val result: AnalyzeResult<TextureTransform>,
+    val result: PaintingfaceAnalysisResult,
     val manager: UnityAssetManager,
     val requiresMerge: Boolean
 ): AnalyzeStatus(true, "")

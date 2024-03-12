@@ -58,7 +58,7 @@ fun rebuildPaintingFrom(tr: PaintingTransform): BufferedImage {
     }
 }
 
-fun decoratePainting(image: BufferedImage, tr: PaintingTransform): BufferedImage {
+fun decoratePainting(image: BufferedImage, tr: PaintingTemplateTransform): BufferedImage {
     val w = maxOf(tr.rawPaintingSize.x.toInt(), image.width)
     val h = maxOf(tr.rawPaintingSize.y.toInt(), image.height)
     return if (w > image.width || h > image.height) {

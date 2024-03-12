@@ -45,27 +45,20 @@ internal fun checkFile(filePath: Path, manager: UnityAssetManager): AnalyzeStatu
     return PreCheckStatus(bundle, baseGameObject, true, "")
 }
 
-internal fun <T: TextureTransform> buildTransformTree(
+internal fun buildTransformTree(
     parent: ExtendedTransform,
-    transformFactory: (ExtendedTransform) -> T?
-): MutableList<T> {
-    val result = mutableListOf<T>()
-    val attach = transformFactory(parent)
-    if (attach != null) {
-        result.add(attach)
-    }
+    transformFactory: (ExtendedTransform) -> Unit
+) {
+    transformFactory(parent)
     for (child in parent.tr.mChildren) {
         val rect = child.safeGetObj()
         if (rect != null) {
-            result.addAll(
-                buildTransformTree(
-                    ExtendedTransformChild(rect, parent),
-                    transformFactory
-                )
+            buildTransformTree(
+                ExtendedTransformChild(rect, parent),
+                transformFactory
             )
         }
     }
-    return result
 }
 
 /**
