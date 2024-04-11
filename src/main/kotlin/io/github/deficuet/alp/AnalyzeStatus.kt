@@ -13,16 +13,11 @@ open class DependencyMissing internal constructor(
     val dependencies: Map<String, Boolean>
 ): AnalyzeStatus(succeed, message)
 
-class StackGroup internal constructor(
-    val stack: List<TextureTransform>,
-    val faceRect: TextureTransform?
-)
-
 class AnalyzeResult internal constructor(
     val width: Int,
     val height: Int,
     val isStacked: Boolean,
-    val group: StackGroup
+    val stack: List<TextureTransform>
 )
 
 class PaintingAnalyzeStatus internal constructor(

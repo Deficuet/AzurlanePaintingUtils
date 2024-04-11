@@ -87,7 +87,6 @@ internal fun buildPaintingStack(root: GameObject, includeFace: Boolean): StackGr
 internal fun measureBoundary(transforms: List<TextureTransform>): Vector4 {
     val left = transforms.minOf { it.pastePoint.x }
     val bottom = transforms.minOf { it.pastePoint.y }
-//    val leftBottom = Vector2(left, bottom)
     val rightTopBoundaries = transforms.map { tr ->
         (tr.size + tr.pastePoint).round()
     }
@@ -96,12 +95,17 @@ internal fun measureBoundary(transforms: List<TextureTransform>): Vector4 {
     return Vector4(left, bottom, right - left, top - bottom)
 }
 
-internal fun pasteCorrection(group: StackGroup): AnalyzeResult {
-    return with(measureBoundary(group.stack)) {
+internal class StackGroup(
+    val stack: List<TextureTransform>,
+    val faceRect: TextureTransform?
+)
+
+internal fun pasteCorrection(stack: List<TextureTransform>): AnalyzeResult {
+    return with(measureBoundary(stack)) {
         val c = vector2
         AnalyzeResult(
-            z.toInt(), w.toInt(), group.stack.count { it.type == TextureType.PAINTING } > 1,
-            group.apply { stack.onEach { it.pastePoint -= c } }
+            z.toInt(), w.toInt(), stack.count { it.type == TextureType.PAINTING } > 1,
+            stack.onEach { it.pastePoint -= c }
         )
     }
 }

@@ -40,15 +40,16 @@ fun analyzePainting(
         return DependencyMissing(dependencies = dependencies)
     }
     val group = buildPaintingStack(baseGameObject, includeFace)
-    val result = pasteCorrection(group)
-//    if (includeFace && !result.isStacked) {
-//        // for guanghui only
-//        val face = group.faceRect!!
-//        face.pastePoint = Vector2(
-//            face.pastePoint.x / face.overallScale.x.coerceAtMost(1f),
-//            face.pastePoint.y / face.overallScale.y.coerceAtMost(1f)
-//        )
-//    }
+    val result = pasteCorrection(group.stack)
+    if (includeFace && !result.isStacked) {
+        //for guanghui only
+        val face = group.faceRect!!
+        face.pastePoint = Vector2(
+            face.pastePoint.x / face.overallScale.x.coerceAtMost(1f),
+            face.pastePoint.y / face.overallScale.y.coerceAtMost(1f)
+        )
+    }
+
     return PaintingAnalyzeStatus(dependencies, result, manager)
 }
 
@@ -94,18 +95,16 @@ fun rebuildPainting(tex: Texture2D, mesh: Mesh): BufferedImage {
     }
 }
 
-fun decoratePainting(image: BufferedImage, tr: PaintingTransform, isStacked: Boolean): BufferedImage {
+fun decoratePainting(image: BufferedImage, tr: PaintingTransform): BufferedImage {
     val rawW = maxOf(tr.rawPaintingSize.x.toInt(), image.width)
     val rawH = maxOf(tr.rawPaintingSize.y.toInt(), image.height)
-    val w = with(tr.unscaledSize.x.roundToInt()) { if (isStacked) maxOf(this, rawW) else this }
-    val h = with(tr.unscaledSize.y.roundToInt()) { if (isStacked) maxOf(this, rawH) else this }
     return if (tr.mesh != null && (rawW > image.width || rawH > image.height)) {
         BufferedImage(rawW, rawH, image.type).paste(image, 0, 0)
     } else {
         image
     }.fancyResize(
-        (w * tr.overallScale.x).roundToInt(),
-        (h * tr.overallScale.y).roundToInt()
+        (maxOf(tr.unscaledSize.x.roundToInt(), rawW) * tr.overallScale.x).roundToInt(),
+        (maxOf(tr.unscaledSize.y.roundToInt(), rawH) * tr.overallScale.y).roundToInt()
     )
 }
 
@@ -119,15 +118,20 @@ fun getPaintingfaceImage(sprite: Sprite): BufferedImage {
     }
 }
 
-fun decoratePaintingface(image: BufferedImage, tr: TextureTransform): BufferedImage {
-    return with(tr.size) {
+fun decoratePaintingface(image: BufferedImage, tr: TextureTransform, isStacked: Boolean): BufferedImage {
+    val scale = if (isStacked) {
+        tr.overallScale
+    } else {
+        with(tr.overallScale) {
+            Vector2(
+                x.coerceAtLeast(1f),
+                y.coerceAtLeast(1f)
+            )
+        }
+    }
+    return with(tr.unscaledSize * scale) {
         image.fancyResize(x.roundToInt(), y.roundToInt())
     }
-//    return if (doScale) {
-//        with(tr.size) {
-//            image.fancyResize(x.roundToInt(), y.roundToInt())
-//        }
-//    } else image
 }
 
 
