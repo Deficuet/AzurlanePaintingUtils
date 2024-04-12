@@ -15,7 +15,7 @@ repositories {
 dependencies {
     implementation 'com.github.Deficuet:UnityKt:0.1.0_alpha.11'
     implementation 'org.json:json:20231013'
-    implementation 'com.github.Deficuet:JImageUtils:0.0.4.1'
+    implementation 'com.github.Deficuet:JImageUtils:0.0.5'
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
