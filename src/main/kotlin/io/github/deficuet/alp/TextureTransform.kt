@@ -35,7 +35,7 @@ class PaintingTransform private constructor(
     tr: ExtendedTransform
 ): TextureTransform(type, tr) {
     internal companion object {
-        private const val NAME_SHOP_HX = "shop_hx"
+        private val NAME_BANNED = setOf("shop_hx", "shadow")
         private const val NAME_BUILTIN_UI_SPRITE = "UISprite"
 
         private fun getMonoBehaviour(gameObject: GameObject): JSONObject? {
@@ -47,7 +47,7 @@ class PaintingTransform private constructor(
             factory: (ExtendedTransform, JSONObject, Sprite, Boolean) -> T
         ): T? {
             val gameObject = tr.tr.mGameObject.getObj()
-            if (gameObject.mName == NAME_SHOP_HX) return null
+            if (gameObject.mName in NAME_BANNED) return null
             return getMonoBehaviour(gameObject)?.let { mono ->
                 if ("m_Sprite" in mono.keySet()) {
                     with(mono.getJSONObject("m_Sprite")) {
