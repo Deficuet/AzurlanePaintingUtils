@@ -15,7 +15,7 @@ import kotlin.io.path.name
 import kotlin.math.roundToInt
 
 fun analyzePainting(
-    filePath: Path, includeFace: Boolean,
+    filePath: Path,
     assetSystemRoot: Path,
     debugOutput: (String) -> Unit = {  }
 ): AnalyzeStatus {
@@ -39,9 +39,9 @@ fun analyzePainting(
     if (!checkPassed) {
         return DependencyMissing(dependencies = dependencies)
     }
-    val group = buildPaintingStack(baseGameObject, includeFace)
+    val group = buildPaintingStack(baseGameObject)
     val result = pasteCorrection(group.stack)
-    if (includeFace && !result.isStacked) {
+    if (!result.isStacked) {
         //for guanghui only
         val face = group.faceRect!!
         face.pastePoint = Vector2(

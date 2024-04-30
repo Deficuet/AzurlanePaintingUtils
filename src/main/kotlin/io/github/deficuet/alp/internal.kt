@@ -62,16 +62,16 @@ internal fun buildTransformTree(
     }
 }
 
-internal fun buildPaintingStack(root: GameObject, includeFace: Boolean): StackGroup {
+internal fun buildPaintingStack(root: GameObject): StackGroup {
     val stack = mutableListOf<TextureTransform>()
     var face: TextureTransform? = null
     var foundFace = false
     buildTransformTree(ExtendedTransform(root.mTransform!!)) {
-        if (includeFace && !foundFace) {
+        if (!foundFace) {
             val gameObject = it.tr.mGameObject.getObj()
             if (gameObject.mName == "face") {
                 foundFace = true
-                face = TextureTransform(TextureType.FACE, it)
+                face = TextureTransform("\$face\$", TextureType.FACE, it)
                 stack.add(face!!)
                 return@buildTransformTree
             }

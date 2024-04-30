@@ -15,6 +15,7 @@ enum class TextureType {
 }
 
 open class TextureTransform internal constructor(
+    val name: String,
     val type: TextureType,
     private val tr: ExtendedTransform
 ) {
@@ -27,13 +28,13 @@ open class TextureTransform internal constructor(
 }
 
 class PaintingTransform private constructor(
-    val fileName: String,
+    name: String,
     val sprite: Sprite,
     val mesh: Mesh?,
     val rawPaintingSize: Vector2,
     type: TextureType,
     tr: ExtendedTransform
-): TextureTransform(type, tr) {
+): TextureTransform(name, type, tr) {
     internal companion object {
         private val NAME_BANNED = setOf("shop_hx", "shadow")
         private const val NAME_BUILTIN_UI_SPRITE = "UISprite"
