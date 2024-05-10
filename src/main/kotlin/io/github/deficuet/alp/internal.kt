@@ -14,14 +14,10 @@ import kotlin.io.path.absolutePathString
 import kotlin.math.round
 
 internal class PreCheckStatus(
-    private val bundle: AssetBundle,
-    private val baseGameObject: GameObject,
+    internal val baseGameObject: GameObject,
     succeed: Boolean,
     message: String
-): AnalyzeStatus(succeed, message) {
-    operator fun component1() = bundle
-    operator fun component2() = baseGameObject
-}
+): AnalyzeStatus(succeed, message)
 
 internal fun checkFile(filePath: Path, manager: UnityAssetManager): AnalyzeStatus {
     if (!Files.isRegularFile(filePath)) {
@@ -41,7 +37,7 @@ internal fun checkFile(filePath: Path, manager: UnityAssetManager): AnalyzeStatu
     if (baseGameObject == null || baseGameObject !is GameObject || baseGameObject.mTransform == null) {
         return AnalyzeStatus(false)
     }
-    return PreCheckStatus(bundle, baseGameObject, true, "")
+    return PreCheckStatus(baseGameObject, true, "")
 }
 
 internal fun Vector2.round() = Vector2(round(x), round(y))

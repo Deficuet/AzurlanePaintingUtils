@@ -12,12 +12,14 @@ import java.nio.file.Path
 import kotlin.collections.set
 import kotlin.io.path.exists
 import kotlin.io.path.name
+import kotlin.io.path.relativeTo
 import kotlin.math.roundToInt
 
 fun analyzePainting(
     filePath: Path,
     assetSystemRoot: Path,
-    debugOutput: (String) -> Unit = {  }
+    dependenciesTable: Map<String, List<String>>,
+    debugOutput: (String) -> Unit = {  },
 ): AnalyzeStatus {
     val manager = UnityAssetManager.new(assetSystemRoot, debugOutput = debugOutput)
     val checkResult = checkFile(filePath, manager)
@@ -25,19 +27,23 @@ fun analyzePainting(
         manager.close()
         return checkResult
     }
-    val (bundle, baseGameObject) = checkResult
+    val baseGameObject = checkResult.baseGameObject
     val dependencies = mutableMapOf<String, Boolean>()
     var checkPassed = true
-    if (bundle.mDependencies.isNotEmpty()) {
-        for (dependency in bundle.mDependencies) {
-            val dependencyPath = assetSystemRoot.resolve(dependency)
-            val exist = dependencyPath.exists()
-            dependencies[dependencyPath.name] = exist
-            if (!exist) checkPassed = false
-        }
+    val dependenciesPathList = dependenciesTable.getValue(
+        filePath.relativeTo(assetSystemRoot).joinToString("/")
+    ).map { assetSystemRoot.resolve(it) }
+    for (dependencyPath in dependenciesPathList) {
+        val exist = dependencyPath.exists()
+        dependencies[dependencyPath.name] = exist
+        if (!exist) checkPassed = false
     }
     if (!checkPassed) {
+        manager.close()
         return DependencyMissing(dependencies = dependencies)
+    }
+    for (dependencyPath in dependenciesPathList) {
+        manager.loadFile(dependencyPath)
     }
     val group = buildPaintingStack(baseGameObject)
     val result = pasteCorrection(group.stack)
@@ -49,7 +55,6 @@ fun analyzePainting(
             face.pastePoint.y / face.overallScale.y.coerceAtMost(1f)
         )
     }
-
     return PaintingAnalyzeStatus(dependencies, result, manager)
 }
 
