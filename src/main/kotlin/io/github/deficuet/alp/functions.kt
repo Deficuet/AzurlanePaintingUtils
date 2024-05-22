@@ -33,7 +33,6 @@ fun analyzePainting(
     val dependenciesPathTable = dependenciesTable.getValue(
         filePath.relativeTo(assetSystemRoot).joinToString("/")
     ).associateWith { assetSystemRoot.resolve(it) }
-    println(dependenciesPathTable)
     for ((pathStr, path) in dependenciesPathTable) {
         val exist = path.exists()
         dependencies[pathStr] = exist
