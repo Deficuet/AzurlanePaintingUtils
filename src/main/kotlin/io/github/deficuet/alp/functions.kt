@@ -30,19 +30,20 @@ fun analyzePainting(
     val baseGameObject = checkResult.baseGameObject
     val dependencies = mutableMapOf<String, Boolean>()
     var checkPassed = true
-    val dependenciesPathList = dependenciesTable.getValue(
+    val dependenciesPathTable = dependenciesTable.getValue(
         filePath.relativeTo(assetSystemRoot).joinToString("/")
-    ).map { assetSystemRoot.resolve(it) }
-    for (dependencyPath in dependenciesPathList) {
-        val exist = dependencyPath.exists()
-        dependencies[dependencyPath.name] = exist
+    ).associateWith { assetSystemRoot.resolve(it) }
+    println(dependenciesPathTable)
+    for ((pathStr, path) in dependenciesPathTable) {
+        val exist = path.exists()
+        dependencies[pathStr] = exist
         if (!exist) checkPassed = false
     }
     if (!checkPassed) {
         manager.close()
         return DependencyMissing(dependencies = dependencies)
     }
-    for (dependencyPath in dependenciesPathList) {
+    for (dependencyPath in dependenciesPathTable.values) {
         manager.loadFile(dependencyPath)
     }
     val group = buildPaintingStack(baseGameObject)
