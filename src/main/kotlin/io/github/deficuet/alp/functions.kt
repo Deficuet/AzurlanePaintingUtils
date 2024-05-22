@@ -11,7 +11,6 @@ import java.awt.image.*
 import java.nio.file.Path
 import kotlin.collections.set
 import kotlin.io.path.exists
-import kotlin.io.path.name
 import kotlin.io.path.relativeTo
 import kotlin.math.roundToInt
 
@@ -30,9 +29,11 @@ fun analyzePainting(
     val baseGameObject = checkResult.baseGameObject
     val dependencies = mutableMapOf<String, Boolean>()
     var checkPassed = true
-    val dependenciesPathTable = dependenciesTable.getValue(
+    val dependenciesPathTable = dependenciesTable[
         filePath.relativeTo(assetSystemRoot).joinToString("/")
-    ).associateWith { assetSystemRoot.resolve(it) }
+    ]?.associateWith {
+        assetSystemRoot.resolve(it)
+    } ?: return AnalyzeStatus(false, "dependencies文件已过时")
     for ((pathStr, path) in dependenciesPathTable) {
         val exist = path.exists()
         dependencies[pathStr] = exist
