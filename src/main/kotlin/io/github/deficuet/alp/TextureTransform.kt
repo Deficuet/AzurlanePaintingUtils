@@ -1,9 +1,6 @@
 package io.github.deficuet.alp
 
-import io.github.deficuet.unitykt.classes.GameObject
-import io.github.deficuet.unitykt.classes.Mesh
-import io.github.deficuet.unitykt.classes.MonoBehaviour
-import io.github.deficuet.unitykt.classes.Sprite
+import io.github.deficuet.unitykt.classes.*
 import io.github.deficuet.unitykt.math.Vector2
 import io.github.deficuet.unitykt.pptr.firstOfOrNull
 import io.github.deficuet.unitykt.pptr.getObj
@@ -47,8 +44,14 @@ class PaintingTransform private constructor(
             tr: ExtendedTransform,
             factory: (ExtendedTransform, JSONObject, Sprite, Boolean) -> T
         ): T? {
+            var rect: Transform? = tr.tr
+            do {
+                if (rect!!.mGameObject.getObj().mName in NAME_BANNED) {
+                    return null
+                }
+                rect = rect.mFather.safeGetObj()
+            } while (rect != null)
             val gameObject = tr.tr.mGameObject.getObj()
-            if (gameObject.mName in NAME_BANNED) return null
             return getMonoBehaviour(gameObject)?.let { mono ->
                 if ("m_Sprite" in mono.keySet()) {
                     with(mono.getJSONObject("m_Sprite")) {
