@@ -1,1 +1,5 @@
 main.*
+*.class
+build/
+.gradle/
+.idea/
