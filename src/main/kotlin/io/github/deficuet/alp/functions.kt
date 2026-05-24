@@ -109,8 +109,6 @@ fun decoratePainting(image: BufferedImage, tr: PaintingTransform): BufferedImage
     } else {
         image
     }.fancyResize(
-//        (maxOf(tr.unscaledSize.x.roundToInt(), rawW) * tr.overallScale.x).roundToInt(),
-//        (maxOf(tr.unscaledSize.y.roundToInt(), rawH) * tr.overallScale.y).roundToInt()
         tr.size.x.roundToInt(),
         tr.size.y.roundToInt()
     )
